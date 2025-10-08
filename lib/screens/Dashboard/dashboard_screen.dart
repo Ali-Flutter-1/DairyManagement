@@ -19,79 +19,81 @@ class DashboardScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-                SizedBox(height: 5,),
-            Text(
-              'Rana Dairy Farm',
-              style:TextStyle(
-                fontWeight: FontWeight.bold,fontFamily: 'Font',fontSize: 24
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                  SizedBox(height: 5,),
+              Text(
+                'Rana Dairy Farm',
+                style:TextStyle(
+                  fontWeight: FontWeight.bold,fontFamily: 'Font',fontSize: 24
+                ),
               ),
-            ),
-            Text(
-              date,
-              style: const TextStyle(color: Colors.grey,fontFamily: 'Font2',fontSize: 14,fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 25),
-
-            // Quick Actions
-            const Text(
-              'Quick Actions',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Font'
+              Text(
+                date,
+                style: const TextStyle(color: Colors.grey,fontFamily: 'Font2',fontSize: 14,fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 15),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                _QuickActionButton(
-                  color: Color(0xFF7CB342),
-                  icon: Icons.local_drink,
-                  label: 'Add Milk',
+              const SizedBox(height: 25),
+        
+              // Quick Actions
+              const Text(
+                'Quick Actions',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Font'
                 ),
-                _QuickActionButton(
-                  color: Color(0xFFD7CCC8),
-                  icon: Icons.person_add,
-                  label: 'Add Employee',
-                ),
-                _QuickActionButton(
-                  color: Color(0xFFE57373),
-                  icon: Icons.receipt_long,
-                  label: 'Add Expense',
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-
-            // Info Cards
-            const _InfoCard(
-              icon: Icons.local_drink,
-              title: "Today's Milk",
-              value: '0 L',
-            ),
-            const _InfoCard(
-              icon: Icons.attach_money,
-              title: 'Monthly Income',
-              value: '20',
-            ),
-            const _InfoCard(
-              icon: Icons.receipt_long,
-              title: 'Monthly Expenses',
-              value: '40',
-            ),
-            const _InfoCard(
-              icon: Icons.trending_up,
-              title: 'Monthly Profit',
-              value: '100',
-            ),
-          ],
+              ),
+              const SizedBox(height: 15),
+        
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: const [
+                  _QuickActionButton(
+                    color: Color(0xFF7CB342),
+                    icon: Icons.local_drink,
+                    label: 'Add Milk',
+                  ),
+                  _QuickActionButton(
+                    color: Color(0xFFD7CCC8),
+                    icon: Icons.person_add,
+                    label: 'Add Employee',
+                  ),
+                  _QuickActionButton(
+                    color: Color(0xFFE57373),
+                    icon: Icons.receipt_long,
+                    label: 'Add Expense',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+        
+              // Info Cards
+              const _InfoCard(
+                icon: Icons.local_drink,
+                title: "Today's Milk",
+                value: '0 L',
+              ),
+              const _InfoCard(
+                icon: Icons.attach_money,
+                title: 'Monthly Income',
+                value: '20',
+              ),
+              const _InfoCard(
+                icon: Icons.receipt_long,
+                title: 'Monthly Expenses',
+                value: '40',
+              ),
+              const _InfoCard(
+                icon: Icons.trending_up,
+                title: 'Monthly Profit',
+                value: '100',
+              ),
+            ],
+          ),
         ),
       ),
     );

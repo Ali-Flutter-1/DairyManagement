@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 
-class MilkScreen extends StatefulWidget {
-  const MilkScreen({super.key});
+class ExpenseScreen extends StatefulWidget {
+  const ExpenseScreen({super.key});
 
   @override
-  State<MilkScreen> createState() => _MilkScreenState();
+  State<ExpenseScreen> createState() => _ExpenseScreenState();
 }
 
-class _MilkScreenState extends State<MilkScreen> {
+class _ExpenseScreenState extends State<ExpenseScreen> {
   String selectedPeriod = "Week";
-
+  String selectedThing= "Others";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          "Milk",
+          "Expenses",
           style: TextStyle(fontWeight: FontWeight.bold,fontFamily: 'Font1'),
         ),
         backgroundColor: Colors.white,
@@ -26,7 +26,7 @@ class _MilkScreenState extends State<MilkScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-        
+
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 24),
               child: Container(
@@ -37,7 +37,7 @@ class _MilkScreenState extends State<MilkScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: Colors.grey.shade200
+                      color: Colors.grey.shade200
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -48,7 +48,7 @@ class _MilkScreenState extends State<MilkScreen> {
                   ],
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     // Total Sales
                     Padding(
@@ -56,22 +56,25 @@ class _MilkScreenState extends State<MilkScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          Row(
+                          Row(mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-        
-                                child: Icon(Icons.attach_money, color: Colors.green),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: CircleAvatar(
+
+                                  child: Icon(Icons.money_off, color: Colors.green),
+                                ),
                               ),
-        
+
                               SizedBox(width: 10),
-        
+
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SizedBox(height: 5,),
                                   Text(
-                                    'Total Sales',
-                                    style: TextStyle(color: Colors.grey,fontFamily: 'Font1',fontWeight: FontWeight.bold),
+                                    'Total Expense (This Month)',
+                                    style: TextStyle(color: Colors.grey,fontFamily: 'Font',fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(height: 4),
                                   Text(
@@ -79,72 +82,29 @@ class _MilkScreenState extends State<MilkScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      fontFamily: 'Font1',
                                     ),
                                   ),
                                 ],
                               )
-        
+
                             ],
                           ),
-        
-        
-        
+
+
+
                         ],
                       ),
                     ),
-        
-                    Container(
-                      width: 1,
-                      height: 40,
-                      color: Colors.grey.shade300,
-                    ),
-        
-                    // Milk Sold
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Row(
-                            children: [
-                              CircleAvatar(
-        
-                                child: Icon(Icons.trending_up, color: Colors.green),
-                              ),
-                              SizedBox(width: 10),
-        
-                              Column(crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 5,),
-                                  Text(
-                                    'Milk Sold',
-                                    style: TextStyle(color: Colors.grey,fontFamily: 'Font1',fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                    '0 L',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              )
-        
-        
-                            ],
-                          ),
-        
-        
-                        ],
-                      ),
-                    ),
+
+
                   ],
                 ),
               ),
             ),
-        
+
             const SizedBox(height: 20),
-        
+
             // --- Time Period Buttons ---
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -152,7 +112,7 @@ class _MilkScreenState extends State<MilkScreen> {
                 const Text(
                   'Time Period:',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,fontFamily: 'Font',fontSize: 18
+                      fontWeight: FontWeight.bold,fontFamily: 'Font',fontSize: 18
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -163,14 +123,14 @@ class _MilkScreenState extends State<MilkScreen> {
                 _buildPeriodButton("All"),
               ],
             ),
-        
+
             const SizedBox(height: 20),
-        
-        
+
+
             Expanded(
               child: Container(
                 width: double.infinity,
-                           height: MediaQuery.sizeOf(context).height,
+                height: MediaQuery.sizeOf(context).height,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF7F8F3),
                   borderRadius: BorderRadius.circular(12),
@@ -178,14 +138,28 @@ class _MilkScreenState extends State<MilkScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 22),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(width: 10),
+                        _buildTabButton("Medicine"),
+                        const SizedBox(width: 10),
+                        _buildTabButton("Equipment"),
+                        const SizedBox(width: 8),
+                        _buildTabButton("Utilities"),
+                        const SizedBox(width: 8),
+                        _buildTabButton("Others"),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
                     const Icon(
-                      Icons.attach_money,
+                      Icons.money_off,
                       color: Colors.green,
                       size: 60,
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      "No Sales Recorded",
+                      "No Expense Recorded",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Font2',
@@ -194,7 +168,7 @@ class _MilkScreenState extends State<MilkScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      "Start by adding your first sale",
+                      "Start by adding your first expense",
                       style: TextStyle(color: Colors.grey,fontSize: 18),
                     ),
                     const SizedBox(height: 25),
@@ -209,7 +183,7 @@ class _MilkScreenState extends State<MilkScreen> {
                         ),
                       ),
                       child: const Text(
-                        "Add Sale",
+                        "Add Expense",
                         style: TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
@@ -243,6 +217,36 @@ class _MilkScreenState extends State<MilkScreen> {
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF7CB342) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildTabButton(String label) {
+    final isSelected = selectedThing == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedThing = label;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ?  Colors.lightBlueAccent.shade100 : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected?Colors.lightBlue.shade200:Colors.grey.shade200,
+            width: 2
+          )
         ),
         child: Text(
           label,

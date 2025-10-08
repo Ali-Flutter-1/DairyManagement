@@ -1,5 +1,8 @@
 import 'package:dairyapp/screens/Dashboard/dashboard_screen.dart';
+import 'package:dairyapp/screens/Employees/employee_screen.dart';
+import 'package:dairyapp/screens/Expenses/expense_screen.dart';
 import 'package:dairyapp/screens/Milk/milk_screen.dart';
+import 'package:dairyapp/screens/Settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
 class BottomBar extends StatefulWidget {
@@ -15,9 +18,9 @@ class _BottomBarState extends State<BottomBar> {
   final List<Widget> pages = const [
     DashboardScreen(),
     MilkScreen(),
-    Center(child: Text('Employees')),
-    Center(child: Text('Expenses')),
-    Center(child: Text('Settings')),
+    EmployeeScreen(),
+    ExpenseScreen(),
+  SettingsScreen(),
   ];
 
   @override
