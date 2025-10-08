@@ -1,3 +1,4 @@
+import 'package:dairyapp/screens/Milk/milk_description_screen.dart';
 import 'package:flutter/material.dart';
 
 class MilkScreen extends StatefulWidget {
@@ -199,7 +200,8 @@ class _MilkScreenState extends State<MilkScreen> {
                     ),
                     const SizedBox(height: 25),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7CB342),
                         padding: const EdgeInsets.symmetric(
@@ -223,9 +225,14 @@ class _MilkScreenState extends State<MilkScreen> {
 
       // --- Floating Action Button ---
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF7CB342),
-        child: const Icon(Icons.add, size: 30, color: Colors.white),
+        heroTag: 'add_milk',  // Unique tag to avoid conflicts
+        backgroundColor: const Color(0xFF4CAF50),
+        foregroundColor: Colors.white,
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>MilkDescriptionScreen()));
+
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }

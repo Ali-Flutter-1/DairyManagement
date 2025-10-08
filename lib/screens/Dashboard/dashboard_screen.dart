@@ -1,3 +1,6 @@
+import 'package:dairyapp/screens/Employees/employee_description_screen.dart';
+import 'package:dairyapp/screens/Expenses/expense_description_screen.dart';
+import 'package:dairyapp/screens/Milk/milk_description_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -51,21 +54,46 @@ class DashboardScreen extends StatelessWidget {
         
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
+                children:  [
                   _QuickActionButton(
                     color: Color(0xFF7CB342),
                     icon: Icons.local_drink,
                     label: 'Add Milk',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MilkDescriptionScreen(),
+                        ),
+                      );
+                    },
+
                   ),
                   _QuickActionButton(
                     color: Color(0xFFD7CCC8),
                     icon: Icons.person_add,
                     label: 'Add Employee',
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EmployeeDescriptionScreen(),
+                        ),
+                      );
+                    },
                   ),
                   _QuickActionButton(
                     color: Color(0xFFE57373),
                     icon: Icons.receipt_long,
                     label: 'Add Expense',
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ExpenseDescriptionScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -106,21 +134,26 @@ class _QuickActionButton extends StatelessWidget {
   final Color color;
   final IconData icon;
   final String label;
+  final VoidCallback? onTap;
 
   const _QuickActionButton({
     required this.color,
     required this.icon,
     required this.label,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CircleAvatar(
-          radius: 36,
-          backgroundColor: color,
-          child: Icon(icon, color: Colors.white, size: 28),
+        GestureDetector(
+          onTap: onTap,
+          child: CircleAvatar(
+            radius: 36,
+            backgroundColor: color,
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
         ),
         const SizedBox(height: 6),
         Text(

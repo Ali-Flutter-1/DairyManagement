@@ -1,3 +1,4 @@
+import 'package:dairyapp/screens/Expenses/expense_description_screen.dart';
 import 'package:flutter/material.dart';
 
 class ExpenseScreen extends StatefulWidget {
@@ -197,7 +198,10 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
       // --- Floating Action Button ---
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        heroTag: 'add_expense',
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>ExpenseDescriptionScreen()));
+        },
         backgroundColor: const Color(0xFF7CB342),
         child: const Icon(Icons.add, size: 30, color: Colors.white),
       ),

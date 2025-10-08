@@ -1,3 +1,4 @@
+import 'package:dairyapp/screens/Employees/employee_description_screen.dart';
 import 'package:flutter/material.dart';
 
 class EmployeeScreen extends StatefulWidget {
@@ -71,7 +72,10 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        heroTag: 'add_employee',
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>EmployeeDescriptionScreen()));
+        },
         backgroundColor: const Color(0xFF7CB342),
         child: const Icon(Icons.add, size: 30, color: Colors.white),
       ),
