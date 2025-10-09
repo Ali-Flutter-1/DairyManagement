@@ -1,5 +1,6 @@
+import 'package:dairyapp/Firebase/employee_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 
 class EmployeeDescriptionScreen extends StatefulWidget {
   const EmployeeDescriptionScreen({super.key});
@@ -11,41 +12,20 @@ class EmployeeDescriptionScreen extends StatefulWidget {
 
 class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
   final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
   final _salaryController = TextEditingController();
 
-  DateTime _selectedDate = DateTime(2025, 10, 7);
+
 
   @override
   void dispose() {
     _nameController.dispose();
-    _descriptionController.dispose();
+    _phoneNumberController.dispose();
     _salaryController.dispose();
 
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF4CAF50)),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +46,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontFamily: 'Font1',
-            color: const Color(0xFF4CAF50),
+            color:  const Color(0xFF7CB342),
           ),
         ),
         backgroundColor: Colors.white,
@@ -83,7 +63,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color(0xFF4CAF50),
+                    backgroundColor:  const Color(0xFF7CB342),
                     child: Icon(Icons.people, color: Colors.white, size: 30),
                   ),
                 ),
@@ -121,15 +101,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInputField(
-                        label: 'Date',
-                        readOnly: true,
-                        controller: TextEditingController(
-                          text: DateFormat('dd/MM/yyyy').format(_selectedDate),
-                        ),
-                        icon: Icons.calendar_today,
-                        onTap: () => _selectDate(context),
-                      ),
+
                       const SizedBox(height: 16),
                       _buildInputField(
                         label: 'Employee Name',
@@ -152,19 +124,64 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
 
                       const SizedBox(height: 16),
                       _buildInputField(
-                        label: 'Description',
-                        controller: _descriptionController,
+                        label: 'Phone Number',
+                        controller: _phoneNumberController,
 
-                        maxLines: 3,
-                        keyboardType: TextInputType.multiline,
+                        maxLines: 1,
+                        keyboardType: TextInputType.number,
                       ),
                       const SizedBox(height: 32),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            String employeeName = _nameController.text.trim();
+                            String employeeSalary = _salaryController.text.trim();
+                            String employeePhone = _phoneNumberController.text.trim();
+
+
+
+                            if (employeeName.isEmpty ||
+                                employeeSalary.isEmpty ||
+                                employeePhone.isEmpty
+                                ) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text(" Please enter all required information")),
+                              );
+                              return;
+                            }
+
+
+                            if (employeePhone.length != 11 || int.tryParse(employeePhone) == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text(" Phone number must be 11 digits")),
+                              );
+                              return;
+                            }
+
+
+                            try {
+                              await EmployeeService().addEmployee(
+                               name: employeeName,
+                                salary: double.tryParse(_salaryController.text) ?? 0.0,
+                                phone: employeePhone,
+                                  context: context
+                              );
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Employee data saved successfully")),
+                              );
+
+
+                              _phoneNumberController.clear();
+                              _salaryController.clear();
+                              _nameController.clear();
+                            } catch (e) {
+                              print(e.toString());
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4CAF50),
+                            backgroundColor:  const Color(0xFF7CB342),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
@@ -177,6 +194,27 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                             ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10,),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                           Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:  Colors.white,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600,color: Color(0xFF7CB342)),
                           ),
                         ),
                       ),

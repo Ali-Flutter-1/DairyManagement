@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -14,7 +15,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
   final _eveningController = TextEditingController();
   final _priceController = TextEditingController();
   final _notesController = TextEditingController();
-  DateTime _selectedDate = DateTime(2025, 10, 7);
+  DateTime _selectedDate = DateTime.now();
 
 
 
@@ -61,10 +62,10 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
         leading: InkWell(onTap: (){
           Navigator.pop(context);
         },
-            child: Icon(Icons.arrow_back_outlined,   color: const Color(0xFF4CAF50),)),
+            child: Icon(Icons.arrow_back_outlined,     color:  const Color(0xFF7CB342),)),
         title:  Text(
           "New Milk Entry",
-          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Font1',   color: const Color(0xFF4CAF50),),
+          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Font1',       color:  const Color(0xFF7CB342),),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -80,7 +81,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color(0xFF4CAF50),
+                    backgroundColor:  const Color(0xFF7CB342),
                     child: Icon(
                       Icons.opacity,
                       color: Colors.white,
@@ -194,7 +195,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
 
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor:  const Color(0xFF7CB342),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -204,6 +205,28 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                         child: const Text(
                           'Save Entry',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10,),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // print("Firebase initialized: ${Firebase.apps.length}");
+
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:  Colors.white,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600,color: Color(0xFF7CB342)),
                         ),
                       ),
                     ),
@@ -230,10 +253,10 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-            color: isSelected ?  Color(0xFF4CAF50) : Colors.transparent,
+            color: isSelected ?    Color(0xFF7CB342) : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-                color: isSelected?Color(0xFF4CAF50):Colors.grey.shade200,
+                color: isSelected?    Color(0xFF7CB342):Colors.grey.shade200,
                 width: 2
             )
         ),

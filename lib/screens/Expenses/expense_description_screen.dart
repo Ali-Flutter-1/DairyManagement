@@ -1,54 +1,79 @@
+import 'package:dairyapp/Firebase/expense_service.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+
 
 class ExpenseDescriptionScreen extends StatefulWidget {
   const ExpenseDescriptionScreen({super.key});
 
   @override
-  State<ExpenseDescriptionScreen> createState() => _ExpenseDescriptionScreenState();
+  State<ExpenseDescriptionScreen> createState() =>
+      _ExpenseDescriptionScreenState();
 }
 
 class _ExpenseDescriptionScreenState extends State<ExpenseDescriptionScreen> {
-
   final _expenseController = TextEditingController();
 
   final _priceController = TextEditingController();
 
-  DateTime _selectedDate = DateTime(2025, 10, 7);
+  final _descriptionController = TextEditingController();
 
 
 
-  String selectedThing= "Other";
+  String? _selectedExpense;
+
+
+
   @override
   void dispose() {
     _expenseController.dispose();
     _priceController.dispose();
-
+    _descriptionController.dispose();
 
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFF4CAF50),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+  void _saveExpense() async {
+    String? expenseCatogary = _selectedExpense;
+    String amountText = _priceController.text.trim();
+    String description = _descriptionController.text.trim();
+    if (expenseCatogary == null || expenseCatogary.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an expense category')),
+      );
+      return;
+    }
+    if (amountText.isEmpty || description.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(' Please fill all fields')),
+      );
+      return;
+    }
+
+    double? amount = double.tryParse(amountText);
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(' Enter a valid amount')),
+      );
+      return;
+    }
+
+    try {
+      await ExpenseService().addExpense(
+        category: expenseCatogary,
+        amount: amount,
+
+        description: description,
+
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(' Expense added successfully')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(' Error: $e')),
+      );
     }
   }
 
@@ -57,13 +82,22 @@ class _ExpenseDescriptionScreenState extends State<ExpenseDescriptionScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
-        leading: InkWell(onTap: (){
-          Navigator.pop(context);
-        },
-            child: Icon(Icons.arrow_back_outlined,   color: const Color(0xFF4CAF50),)),
-        title:  Text(
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(
+            Icons.arrow_back_outlined,
+            color: const Color(0xFF4CAF50),
+          ),
+        ),
+        title: Text(
           "New Expense Entry",
-          style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Font1',   color: const Color(0xFF4CAF50),),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Font1',
+            color: const Color(0xFF7CB342),
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -79,12 +113,8 @@ class _ExpenseDescriptionScreenState extends State<ExpenseDescriptionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundColor: Color(0xFF4CAF50),
-                    child: Icon(
-                      Icons.money_off,
-                      color: Colors.white,
-                      size: 30,
-                    ),
+                    backgroundColor: const Color(0xFF7CB342),
+                    child: Icon(Icons.money_off, color: Colors.white, size: 30),
                   ),
                 ),
               ),
@@ -102,85 +132,130 @@ class _ExpenseDescriptionScreenState extends State<ExpenseDescriptionScreen> {
                     SizedBox(height: 4),
                     Text(
                       'Track expenses for your dairy operations',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
               Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 20.0,
+                    horizontal: 16,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20.0,
-                      horizontal: 16,
-                    ),
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildInputField(
-                          label: 'Date',
-                          readOnly: true,
-                          controller: TextEditingController(
-                            text: DateFormat('dd/MM/yyyy').format(_selectedDate),
-                          ),
-                          icon: Icons.calendar_today,
-                          onTap: () => _selectDate(context),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildInputField(
-                          label: 'Name of Expense',
-                          controller: _expenseController,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
 
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildInputField(
-                          label: 'Total Amount',
-                          controller: _priceController,
-
-                          keyboardType: TextInputType.numberWithOptions(decimal: true),
-                        ),
-                        const SizedBox(height: 16),
-
-                        const SizedBox(height: 32),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4CAF50),
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const Text(
-                              'Save Entry',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                            ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Name of Expense',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                      ],
-                    ),
-                  )
-              ) ],
+                        value: _selectedExpense,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'Medicine',
+                            child: Text('Medicine'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Equipment',
+                            child: Text('Equipment'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Utilities',
+                            child: Text('Utilities'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'Others',
+                            child: Text('Others'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedExpense = value!;
+                          });
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+                      _buildInputField(
+                        label: 'Amount',
+                        controller: _priceController,
+
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildInputField(
+                        label: 'Description',
+                        controller: _descriptionController,
+                        maxLines: 3,
+                        keyboardType: TextInputType.multiline,
+                      ),
+                      const SizedBox(height: 16),
+
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _saveExpense,
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF7CB342),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Save Entry',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10,),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:  Colors.white,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600,color: Color(0xFF7CB342)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-
-
-
 
   Widget _buildInputField({
     required String label,
@@ -196,12 +271,7 @@ class _ExpenseDescriptionScreenState extends State<ExpenseDescriptionScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontSize: 16,
-
-            fontWeight: FontWeight.bold,
-
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -240,4 +310,5 @@ class _ExpenseDescriptionScreenState extends State<ExpenseDescriptionScreen> {
         ),
       ],
     );
-  }}
+  }
+}

@@ -3,12 +3,16 @@ import 'package:dairyapp/screens/Expenses/expense_description_screen.dart';
 import 'package:dairyapp/screens/Milk/milk_description_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../../Provider/provider_userdata.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<FarmProvider>(context);
     final date = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
 
     return Scaffold(
@@ -29,12 +33,18 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                   SizedBox(height: 5,),
-              Text(
-                'Rana Dairy Farm',
-                style:TextStyle(
-                  fontWeight: FontWeight.bold,fontFamily: 'Font',fontSize: 24
-                ),
-              ),
+                   Text(
+                    provider.ownerName.isNotEmpty
+                        ? provider.ownerName
+                        : 'Owner Name',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Font',
+                      color: Colors.black87,
+                    ),
+                  ),
+
               Text(
                 date,
                 style: const TextStyle(color: Colors.grey,fontFamily: 'Font2',fontSize: 14,fontWeight: FontWeight.bold),
@@ -196,7 +206,7 @@ class _InfoCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           children: [
-            Icon(icon, color: Colors.green, size: 26),
+            Icon(icon,   color:  const Color(0xFF7CB342), size: 26),
             const SizedBox(width: 12),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),

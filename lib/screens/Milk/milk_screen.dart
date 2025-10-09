@@ -61,7 +61,7 @@ class _MilkScreenState extends State<MilkScreen> {
                             children: [
                               CircleAvatar(
         
-                                child: Icon(Icons.attach_money, color: Colors.green),
+                                child: Icon(Icons.attach_money,   color:  const Color(0xFF7CB342),),
                               ),
         
                               SizedBox(width: 10),
@@ -110,7 +110,7 @@ class _MilkScreenState extends State<MilkScreen> {
                             children: [
                               CircleAvatar(
         
-                                child: Icon(Icons.trending_up, color: Colors.green),
+                                child: Icon(Icons.trending_up,   color:  const Color(0xFF7CB342),),
                               ),
                               SizedBox(width: 10),
         
@@ -181,7 +181,7 @@ class _MilkScreenState extends State<MilkScreen> {
                     const SizedBox(height: 22),
                     const Icon(
                       Icons.attach_money,
-                      color: Colors.green,
+                      color:  const Color(0xFF7CB342),
                       size: 60,
                     ),
                     const SizedBox(height: 16),
@@ -201,6 +201,7 @@ class _MilkScreenState extends State<MilkScreen> {
                     const SizedBox(height: 25),
                     ElevatedButton(
                       onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>MilkDescriptionScreen()));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7CB342),
@@ -226,7 +227,8 @@ class _MilkScreenState extends State<MilkScreen> {
       // --- Floating Action Button ---
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_milk',  // Unique tag to avoid conflicts
-        backgroundColor: const Color(0xFF4CAF50),
+        backgroundColor:
+        const Color(0xFF7CB342),
         foregroundColor: Colors.white,
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (context)=>MilkDescriptionScreen()));

@@ -63,7 +63,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                                 child: CircleAvatar(
 
-                                  child: Icon(Icons.money_off, color: Colors.green),
+                                  child: Icon(Icons.money_off,   color:  const Color(0xFF7CB342),),
                                 ),
                               ),
 
@@ -139,23 +139,28 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 22),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(width: 10),
-                        _buildTabButton("Medicine"),
-                        const SizedBox(width: 10),
-                        _buildTabButton("Equipment"),
-                        const SizedBox(width: 8),
-                        _buildTabButton("Utilities"),
-                        const SizedBox(width: 8),
-                        _buildTabButton("Others"),
-                      ],
+                    SizedBox(
+                      height: 40,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            _buildTabButton("Medicine"),
+                            const SizedBox(width: 10),
+                            _buildTabButton("Equipment"),
+                            const SizedBox(width: 8),
+                            _buildTabButton("Utilities"),
+                            const SizedBox(width: 8),
+                            _buildTabButton("Others"),
+                          ],
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 40),
                     const Icon(
                       Icons.money_off,
-                      color: Colors.green,
+                      color:    const Color(0xFF7CB342),
                       size: 60,
                     ),
                     const SizedBox(height: 16),
@@ -174,7 +179,9 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     ),
                     const SizedBox(height: 25),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ExpenseDescriptionScreen()));
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7CB342),
                         padding: const EdgeInsets.symmetric(
