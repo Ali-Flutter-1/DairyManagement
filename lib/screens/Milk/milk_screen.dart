@@ -1,5 +1,11 @@
+
+import 'package:dairyapp/Model/milk_model.dart';
+import 'package:dairyapp/Provider/milk_provider.dart';
 import 'package:dairyapp/screens/Milk/milk_description_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../Firebase/milk_service.dart';
 
 class MilkScreen extends StatefulWidget {
   const MilkScreen({super.key});
@@ -13,6 +19,7 @@ class _MilkScreenState extends State<MilkScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider=Provider.of<MilkProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -31,7 +38,7 @@ class _MilkScreenState extends State<MilkScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 24),
               child: Container(
-                // padding: const EdgeInsets.symmetric(vertical: 20,horizontal: 24),
+
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
                 decoration: BoxDecoration(
@@ -56,7 +63,7 @@ class _MilkScreenState extends State<MilkScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children:  [
                           Row(
                             children: [
                               CircleAvatar(
@@ -75,8 +82,7 @@ class _MilkScreenState extends State<MilkScreen> {
                                     style: TextStyle(color: Colors.grey,fontFamily: 'Font1',fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(height: 4),
-                                  Text(
-                                    'Rs 0.00',
+                                  Text(provider.totalRevenue.toString(),
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -105,7 +111,7 @@ class _MilkScreenState extends State<MilkScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children:  [
                           Row(
                             children: [
                               CircleAvatar(
@@ -122,7 +128,7 @@ class _MilkScreenState extends State<MilkScreen> {
                                     style: TextStyle(color: Colors.grey,fontFamily: 'Font1',fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                    '0 L',
+                                   provider.totalLitres.toString(),
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -166,60 +172,185 @@ class _MilkScreenState extends State<MilkScreen> {
             ),
         
             const SizedBox(height: 20),
-        
-        
+
+
             Expanded(
-              child: Container(
-                width: double.infinity,
-                           height: MediaQuery.sizeOf(context).height,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF7F8F3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 22),
-                    const Icon(
-                      Icons.attach_money,
-                      color:  const Color(0xFF7CB342),
-                      size: 60,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "No Sales Recorded",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Font2',
-                        fontSize: 20,
+              child: StreamBuilder<List<MilkSale>>(
+                stream: MilkService().getAllMilkSales(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.attach_money, color: Color(0xFF7CB342), size: 60),
+                          SizedBox(height: 16),
+                          Text(
+                            "No Sales Recorded",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Font2',
+                              fontSize: 20,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            "Start by adding your first sale",
+                            style: TextStyle(color: Colors.grey, fontSize: 18),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Start by adding your first sale",
-                      style: TextStyle(color: Colors.grey,fontSize: 18),
-                    ),
-                    const SizedBox(height: 25),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>MilkDescriptionScreen()));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF7CB342),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    );
+                  }
+
+                  final sales = snapshot.data!;
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: sales.length,
+                    itemBuilder: (context, index) {
+                      final sale = sales[index];
+
+                      final totalLiters = (sale.morningQuantity) + (sale.eveningQuantity);
+                      final totalPrice = totalLiters * sale.pricePerLitre;
+                      final formattedDate = DateFormat('dd MMM yyyy').format(sale.date);
+
+
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFFB9F6CA), // light mint green
+                              Color(0xFF7CB342), // your original green
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ),
-                      child: const Text(
-                        "Add Sale",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
+                        child: Card(
+                          elevation: 0,
+                          margin: EdgeInsets.zero,
+                          color: Colors.transparent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Milk Icon
+                                Container(
+                                  height: 50,
+                                  width: 50,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.local_drink, color: Colors.green),
+                                ),
+                                const SizedBox(width: 16),
+
+                                // Details
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Customer + Price
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            sale.customer,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            "Rs ${totalPrice.toStringAsFixed(2)}",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+
+                                      // Morning & Evening quantities
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.wb_sunny, color: Colors.yellow, size: 18),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            "${sale.morningQuantity} L",
+                                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          const Icon(Icons.nightlight_round, color: Colors.blueAccent, size: 18),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            "${sale.eveningQuantity} L",
+                                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+
+                                      // Price per litre
+                                      Text(
+                                        "Price/Litre: Rs ${sale.pricePerLitre}",
+                                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                      ),
+
+                                      // Date
+                                      Text(
+                                        "Date: $formattedDate",
+                                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                                      ),
+
+                                      // Notes
+                                      if (sale.notes.isNotEmpty)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            "Notes: ${sale.notes}",
+                                            style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontStyle: FontStyle.italic,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+
+                },
               ),
             ),
+
           ],
         ),
       ),

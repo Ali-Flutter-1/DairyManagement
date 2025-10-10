@@ -23,4 +23,6 @@ class ExpenseService {
   Stream<QuerySnapshot> getExpensesStream() {
     return expenses.orderBy('createdAt', descending: true).snapshots();
   }
+
+
 }

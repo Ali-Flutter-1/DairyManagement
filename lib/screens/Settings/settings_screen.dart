@@ -45,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor:Colors.grey.shade200,
       appBar: AppBar(
         title: const Text(
           "Settings",
@@ -81,7 +81,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         color:  const Color(0xFF7CB342),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 4),
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: ownerNameController,
                       builder: (context, value, _) {
@@ -96,7 +96,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       },
                     ),
-
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: farmNameController,
                       builder: (context, value, _) {
@@ -218,6 +217,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        "Milk Price per Liter",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Font',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       CustomTextField(
                         icon: Icons.money_off,
 
@@ -276,10 +283,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
 
 
-                              // farmNameController.clear();
-                              // ownerNameController.clear();
-                              // phoneNumberController.clear();
-                              // milkPriceController.clear();
+
                             } catch (e) {
                              print(e.toString());
                             }

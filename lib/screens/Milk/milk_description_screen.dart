@@ -1,6 +1,10 @@
 
+import 'package:dairyapp/Provider/milk_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../../Model/milk_model.dart';
 
 class MilkDescriptionScreen extends StatefulWidget {
   const MilkDescriptionScreen({super.key});
@@ -56,6 +60,8 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
@@ -191,9 +197,48 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          final morning = double.tryParse(_morningController.text.trim()) ?? 0.0;
+                          final evening = double.tryParse(_eveningController.text.trim()) ?? 0.0;
+                          final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
+                          final notes = _notesController.text.trim();
 
+                          if (morning == 0 &&evening == 0 || price == 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Please fill all required fields.")),
+                            );
+                            return;
+                          }
+
+                          final sale = MilkSale(
+                            morningQuantity: morning,
+                            eveningQuantity: evening,
+                            pricePerLitre: price,
+                            notes: notes,
+                            customer: selectedThing,
+                            date: _selectedDate,
+                            createdAt: DateTime.now(),
+                          );
+
+                          try {
+                            await Provider.of<MilkProvider>(context, listen: false).addMilkSale(sale);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Milk entry saved successfully!")),
+                            );
+
+                            _morningController.clear();
+                            _eveningController.clear();
+                            _priceController.clear();
+                            _notesController.clear();
+                            Navigator.pop(context);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Error: $e")),
+                            );
+                          }
                         },
+
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor:  const Color(0xFF7CB342),
                           foregroundColor: Colors.white,
@@ -213,7 +258,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // print("Firebase initialized: ${Firebase.apps.length}");
+                      Navigator.pop(context);
 
                         },
                         style: ElevatedButton.styleFrom(

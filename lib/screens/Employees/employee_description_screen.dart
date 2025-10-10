@@ -54,6 +54,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+          // scrollDirection: Axis.vertical,
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

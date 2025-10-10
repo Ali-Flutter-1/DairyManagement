@@ -1,4 +1,6 @@
 
+import 'package:dairyapp/Provider/expense_provider.dart';
+import 'package:dairyapp/Provider/milk_provider.dart';
 import 'package:dairyapp/screens/BottomNavBar/bottom_nav.dart';
 
 import 'package:device_preview/device_preview.dart';
@@ -18,6 +20,8 @@ void main() async {
       builder: (context) => MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => FarmProvider()..loadFarmData()),
+          ChangeNotifierProvider(create: (_)=>ExpenseProvider()..fetchMonthlyExpense()),
+          ChangeNotifierProvider(create: (_)=>MilkProvider()..fetchMilkSales())
         ],
         child: const MyApp(),
       ),

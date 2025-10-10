@@ -1,3 +1,5 @@
+import 'package:dairyapp/Provider/expense_provider.dart';
+import 'package:dairyapp/Provider/milk_provider.dart';
 import 'package:dairyapp/screens/Employees/employee_description_screen.dart';
 import 'package:dairyapp/screens/Expenses/expense_description_screen.dart';
 import 'package:dairyapp/screens/Milk/milk_description_screen.dart';
@@ -13,6 +15,11 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<FarmProvider>(context);
+    final expenseProvider= Provider.of<ExpenseProvider>(context);
+    final monthlyExpense = expenseProvider.monthlyExpense.toStringAsFixed(2);
+    final milkProvider=Provider.of<MilkProvider>(context);
+    final totalIncome=milkProvider.totalRevenue.toStringAsFixed(2);
+    final todayMilkSold = milkProvider.todayMilkSold.toStringAsFixed(2);
     final date = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
 
     return Scaffold(
@@ -28,6 +35,7 @@ class DashboardScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
+              // scrollDirection: Axis.vertical,
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,25 +118,25 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(height: 30),
         
               // Info Cards
-              const _InfoCard(
+              _InfoCard(
                 icon: Icons.local_drink,
                 title: "Today's Milk",
-                value: '0 L',
+                value: '\$$todayMilkSold',
               ),
-              const _InfoCard(
+              _InfoCard(
                 icon: Icons.attach_money,
                 title: 'Monthly Income',
-                value: '20',
+                value: '\$$totalIncome',
               ),
-              const _InfoCard(
+              _InfoCard(
                 icon: Icons.receipt_long,
                 title: 'Monthly Expenses',
-                value: '40',
+                value: '\$$monthlyExpense',
               ),
-              const _InfoCard(
+              _InfoCard(
                 icon: Icons.trending_up,
                 title: 'Monthly Profit',
-                value: '100',
+                value: '\$$totalIncome',
               ),
             ],
           ),

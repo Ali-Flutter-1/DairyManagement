@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dairyapp/Firebase/employee_service.dart';
-
 import 'package:dairyapp/screens/Employees/employee_description_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +16,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           "Employees",
@@ -98,44 +97,81 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
               padding: const EdgeInsets.all(12),
               itemCount: employees.length,
               itemBuilder: (context, index) {
-                final data =
-                employees[index].data() as Map<String, dynamic>;
-
+                final data = employees[index].data() as Map<String, dynamic>;
                 final name = data['name'] ?? 'Unknown';
                 final salary = data['salary']?.toString() ?? '0.0';
                 final phone = data['phone'] ?? 'N/A';
 
-                return Card(
-                  margin: const EdgeInsets.symmetric(vertical: 8),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFE8F5E9), // very light green
+                        Color(0xFFB9F6CA), // minty green
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.green.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: ListTile(
-                    leading: const CircleAvatar(
-                      radius: 25,
-                       
-                      backgroundColor: Color(0xFF7CB342),
-                      child: Icon(Icons.person),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    leading: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF7CB342),
+                            Color(0xFF9CCC65),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: const CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.transparent,
+                        child: Icon(Icons.person, color: Colors.white, size: 26),
+                      ),
                     ),
                     title: Text(
                       name,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        color: Colors.black87,
                         fontFamily: 'Font',
                       ),
                     ),
-                    subtitle: Text(
-                      'Salary: $salary\nPhone: $phone',
-                      style: const TextStyle(height: 1.4),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        '💰 Salary: $salary\n📞 Phone: $phone',
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          height: 1.5,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                     isThreeLine: true,
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      icon: const Icon(Icons.delete_rounded, color: Colors.redAccent, size: 26),
                       onPressed: () {
                         _firestoreService.deleteEmployee(employees[index].id);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('$name deleted')),
+                          SnackBar(
+                            content: Text('$name deleted'),
+                            backgroundColor: Colors.redAccent.shade200,
+                          ),
                         );
                       },
                     ),
