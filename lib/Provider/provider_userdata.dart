@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Firebase/FirebaseService.dart';
+import '../Firebase/firebase_service.dart';
 
 class FarmProvider extends ChangeNotifier {
   final FirebaseService _firebaseService = FirebaseService();
@@ -28,6 +28,10 @@ class FarmProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+  }
+  void updateMilkPrice(double newPrice) {
+    pricePerLiter = newPrice;
+    notifyListeners();
   }
 
 }

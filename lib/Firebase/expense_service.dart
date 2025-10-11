@@ -24,5 +24,10 @@ class ExpenseService {
     return expenses.orderBy('createdAt', descending: true).snapshots();
   }
 
-
+  Future<void> deleteExpensesByCategory(String category) async {
+    final snapshot = await expenses.where('category', isEqualTo: category).get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
 }

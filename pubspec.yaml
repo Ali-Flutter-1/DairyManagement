@@ -39,6 +39,9 @@ dependencies:
   firebase_core: ^3.6.0
   cloud_firestore: ^5.4.4
   provider: ^6.1.5+1
+  delightful_toast: ^1.1.0
+  image_picker: ^1.2.0
+  firebase_storage: ^12.3.2
 
 dev_dependencies:
   flutter_test:

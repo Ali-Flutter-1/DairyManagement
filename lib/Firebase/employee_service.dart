@@ -25,6 +25,19 @@ class EmployeeService {
     return employees.orderBy('createdAt', descending: true).snapshots();
   }
 
+  Future<double> getTotalSalaries() async {
+    final snapshot = await employees.get();
+    double total = 0;
+
+    for (var doc in snapshot.docs) {
+      final salary = (doc['salary'] ?? 0).toDouble();
+      total += salary;
+    }
+
+    return total;
+  }
+
+
   // 🔹 Delete employee
   Future<void> deleteEmployee(String id) async {
     await employees.doc(id).delete();

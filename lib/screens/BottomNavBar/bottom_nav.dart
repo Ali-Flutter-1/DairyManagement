@@ -33,18 +33,18 @@ class _BottomBarState extends State<BottomBar> {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: Colors.white,
-          indicatorColor: Colors.green.withOpacity(0.15),
-          labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>(
+          indicatorColor: Colors.green.withValues(alpha: 0.15),
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>(
                 (states) => TextStyle(
               fontWeight: FontWeight.w600,
-              color: states.contains(MaterialState.selected)
+              color: states.contains(WidgetState.selected)
                   ? Colors.green
                   : Colors.grey,
             ),
           ),
-          iconTheme: MaterialStateProperty.resolveWith<IconThemeData>(
+          iconTheme: WidgetStateProperty.resolveWith<IconThemeData>(
                 (states) => IconThemeData(
-              color: states.contains(MaterialState.selected)
+              color: states.contains(WidgetState.selected)
                   ? Colors.green
                   : Colors.grey,
             ),

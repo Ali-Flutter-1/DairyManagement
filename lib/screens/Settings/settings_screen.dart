@@ -1,7 +1,9 @@
 
-import 'package:dairyapp/CustomWidets/customTextfield.dart';
-import 'package:dairyapp/Firebase/FirebaseService.dart';
+import 'package:dairyapp/CustomWidets/custom_text_field.dart';
+import 'package:dairyapp/CustomWidets/custom_toast.dart';
+import 'package:dairyapp/Firebase/firebase_service.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import '../../Provider/provider_userdata.dart';
@@ -18,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   TextEditingController ownerNameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController   milkPriceController=TextEditingController();
+  bool _isLoading=false;
 
   @override
   void initState() {
@@ -78,15 +81,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: const Icon(
                         Icons.person_outline,
                         size: 40,
-                        color:  const Color(0xFF7CB342),
+                        color:   Color(0xFF7CB342),
                       ),
                     ),
                     const SizedBox(height: 4),
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: ownerNameController,
                       builder: (context, value, _) {
+                        // Use text field value if not empty, otherwise fallback to provider value
+                        String displayName = value.text.isNotEmpty
+                            ? value.text
+                            : provider.ownerName.isNotEmpty
+                            ? provider.ownerName
+                            : 'Owner Name';
                         return Text(
-                          value.text.isEmpty ? 'Owner Name' : value.text,
+                          displayName,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -99,8 +108,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ValueListenableBuilder<TextEditingValue>(
                       valueListenable: farmNameController,
                       builder: (context, value, _) {
+                        String displayFarm = value.text.isNotEmpty
+                            ? value.text
+                            : provider.farmName.isNotEmpty
+                            ? provider.farmName
+                            : 'Farm Name';
                         return Text(
-                          value.text.isEmpty ? 'Farm Name' : value.text,
+                          displayFarm,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -110,6 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         );
                       },
                     ),
+
 
 
                     const SizedBox(height: 32),
@@ -235,7 +250,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () async {
+                          onPressed:_isLoading?null: () async {
                             String farmName = farmNameController.text.trim();
                             String ownerName = ownerNameController.text.trim();
                             String phoneNumber = phoneNumberController.text.trim();
@@ -246,30 +261,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ownerName.isEmpty ||
                                 phoneNumber.isEmpty ||
                                 priceText.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text(" Please enter all required information")),
-                              );
+                            showCustomToast(context, "Please Enter the Required Information");
                               return;
                             }
 
 
                             if (phoneNumber.length != 11 || int.tryParse(phoneNumber) == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text(" Phone number must be 11 digits")),
-                              );
+                              showCustomToast(context, "Phone Number Must be 11 digits");
                               return;
                             }
 
 
                             double? price = double.tryParse(priceText);
                             if (price == null || price <= 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text(" Enter a valid milk price (e.g. 150.5)")),
-                              );
+                              showCustomToast(context, "Enter a Valid Milk Price");
                               return;
                             }
 
-
+                            setState(() {
+                              _isLoading = false; // Stop loading
+                            });
                             try {
                               await FirebaseService().addUserData(
                                 farmName: farmName,
@@ -277,15 +288,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ownerNumber: phoneNumber,
                                 pricePerLiter: price,
                               );
+                              await Provider.of<FarmProvider>(context, listen: false).loadFarmData();
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Farm data saved successfully")),
-                              );
+                              showCustomToast(context, "Form Data Saved Successfully");
 
 
 
                             } catch (e) {
                              print(e.toString());
+                             showCustomToast(context, "Error");
+                            }finally {
+                              setState(() {
+                                _isLoading = false; // Stop loading
+                              });
                             }
                           },
 
@@ -297,7 +312,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
+                          child: _isLoading
+                              ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                              : const Text(
                             'Save Entry',
                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                           ),

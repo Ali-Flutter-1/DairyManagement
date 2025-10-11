@@ -1,9 +1,12 @@
 
+import 'package:dairyapp/CustomWidets/custom_inner_text_field.dart';
 import 'package:dairyapp/Provider/milk_provider.dart';
+import 'package:dairyapp/Provider/provider_userdata.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../CustomWidets/custom_toast.dart';
 import '../../Model/milk_model.dart';
 
 class MilkDescriptionScreen extends StatefulWidget {
@@ -15,13 +18,18 @@ class MilkDescriptionScreen extends StatefulWidget {
 
 class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
 
+
+
   final _morningController = TextEditingController();
   final _eveningController = TextEditingController();
   final _priceController = TextEditingController();
   final _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  String selectedSession = 'Morning'; // Add this variable
+  final _quantityController = TextEditingController(); // Add this controller
 
 
+  bool _isLoading=false;
 
   String selectedThing= "Other";
 
@@ -35,6 +43,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -57,9 +66,17 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
       });
     }
   }
+  @override
+  void initState() {
+    super.initState();
+    final priceProvider = Provider.of<FarmProvider>(context, listen: false);
+    _priceController.text = priceProvider.pricePerLiter.toString();
+  }
+
 
   @override
   Widget build(BuildContext context) {
+
 
 
     return Scaffold(
@@ -87,7 +104,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundColor:  const Color(0xFF7CB342),
+                    backgroundColor:   Color(0xFF7CB342),
                     child: Icon(
                       Icons.opacity,
                       color: Colors.white,
@@ -131,7 +148,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                   ),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInputField(
+                    CustomInnerInputField(
                       label: 'Date',
                       readOnly: true,
                       controller: TextEditingController(
@@ -141,19 +158,50 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                       onTap: () => _selectDate(context),
                     ),
                     const SizedBox(height: 16),
-                    _buildInputField(
-                      label: 'Morning Quantity (L)',
-                      controller: _morningController,
-
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    // Morning Quantity Dropdown
+                    const Text(
+                      'Select Session',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedSession,
+                          items: ['Morning', 'Evening']
+                              .map((value) => DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedSession = value!;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 16),
-                    _buildInputField(
-                      label: 'Evening Quantity (L)',
-                      controller: _eveningController,
-
-                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    CustomInnerInputField(
+                      label: 'Quantity (L)',
+                      hintText: "Enter Milk Liter's",
+                      controller: _quantityController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     ),
+
                     const SizedBox(height: 16),
                     const Text(
                       'Customer',
@@ -177,7 +225,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    _buildInputField(
+                    CustomInnerInputField(
                       label: 'Price Per Litre',
                       controller: _priceController,
 
@@ -186,7 +234,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildInputField(
+                    CustomInnerInputField(
                       label: 'Notes (Optional)',
                       controller: _notesController,
 
@@ -196,23 +244,23 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                     const SizedBox(height: 32),
                     SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final morning = double.tryParse(_morningController.text.trim()) ?? 0.0;
-                          final evening = double.tryParse(_eveningController.text.trim()) ?? 0.0;
+                      child:
+                      ElevatedButton(
+                        onPressed: _isLoading
+                            ? null // Disable button while loading
+                            : () async {
+                          final quantity = double.tryParse(_quantityController.text.trim()) ?? 0.0;
                           final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
                           final notes = _notesController.text.trim();
 
-                          if (morning == 0 &&evening == 0 || price == 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Please fill all required fields.")),
-                            );
+                          if (quantity <= 0) {
+                            showCustomToast(context, "Please enter a valid milk quantity");
                             return;
                           }
 
                           final sale = MilkSale(
-                            morningQuantity: morning,
-                            eveningQuantity: evening,
+                            morningQuantity: selectedSession == 'Morning' ? quantity : 0.0,
+                            eveningQuantity: selectedSession == 'Evening' ? quantity : 0.0,
                             pricePerLitre: price,
                             notes: notes,
                             customer: selectedThing,
@@ -220,11 +268,22 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                             createdAt: DateTime.now(),
                           );
 
+
+                          if (price <= 0) {
+                            showCustomToast(context, "Invalid price. Please enter or use default price.");
+                            return;
+                          }
+
+
+
+
+                          setState(() {
+                            _isLoading = true; // Start loading
+                          });
+
                           try {
                             await Provider.of<MilkProvider>(context, listen: false).addMilkSale(sale);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Milk entry saved successfully!")),
-                            );
+                            showCustomToast(context, "Milk Entry saved successfully");
 
                             _morningController.clear();
                             _eveningController.clear();
@@ -232,22 +291,31 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                             _notesController.clear();
                             Navigator.pop(context);
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Error: $e")),
-                            );
+                            showCustomToast(context, "Error :$e");
+                          } finally {
+                            setState(() {
+                              _isLoading = false; // Stop loading
+                            });
                           }
                         },
-
-
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:  const Color(0xFF7CB342),
+                          backgroundColor: const Color(0xFF7CB342),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
+                        child: _isLoading
+                            ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : const Text(
                           'Save Entry',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                         ),
@@ -316,63 +384,5 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
     );
   }
 
-  Widget _buildInputField({
-    required String label,
-    TextEditingController? controller,
-    IconData? icon,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-    bool readOnly = false,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
 
-            fontWeight: FontWeight.bold,
-
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          readOnly: readOnly,
-          onTap: onTap,
-          validator: (value) {
-            if (!readOnly && (value?.isEmpty ?? true)) {
-              return 'Please enter $label';
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-            prefixIcon: icon != null
-                ? Icon(icon, color: Colors.grey[400])
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF4CAF50)),
-            ),
-            contentPadding: const EdgeInsets.all(16.0),
-            isDense: true,
-            filled: true,
-            fillColor: Colors.white,
-          ),
-        ),
-      ],
-    );
-  }
 }

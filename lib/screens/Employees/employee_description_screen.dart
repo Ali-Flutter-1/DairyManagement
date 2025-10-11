@@ -1,5 +1,7 @@
+import 'package:dairyapp/CustomWidets/custom_inner_text_field.dart';
 import 'package:dairyapp/Firebase/employee_service.dart';
 import 'package:flutter/material.dart';
+import '../../CustomWidets/custom_toast.dart';
 
 
 class EmployeeDescriptionScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
   final _phoneNumberController = TextEditingController();
   final _salaryController = TextEditingController();
 
+  bool _isLoading=false;
 
 
   @override
@@ -64,7 +67,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                   padding: EdgeInsets.symmetric(vertical: 16.0),
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundColor:  const Color(0xFF7CB342),
+                    backgroundColor:   Color(0xFF7CB342),
                     child: Icon(Icons.people, color: Colors.white, size: 30),
                   ),
                 ),
@@ -104,7 +107,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                     children: [
 
                       const SizedBox(height: 16),
-                      _buildInputField(
+                      CustomInnerInputField(
                         label: 'Employee Name',
                         controller: _nameController,
 
@@ -113,7 +116,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      _buildInputField(
+                      CustomInnerInputField(
                         label: 'Employee Salary',
                         controller: _salaryController,
 
@@ -124,7 +127,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                       const SizedBox(height: 16),
 
                       const SizedBox(height: 16),
-                      _buildInputField(
+                      CustomInnerInputField(
                         label: 'Phone Number',
                         controller: _phoneNumberController,
 
@@ -135,7 +138,8 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () async {
+                          onPressed: _isLoading?null:()
+                          async {
                             String employeeName = _nameController.text.trim();
                             String employeeSalary = _salaryController.text.trim();
                             String employeePhone = _phoneNumberController.text.trim();
@@ -146,21 +150,19 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                                 employeeSalary.isEmpty ||
                                 employeePhone.isEmpty
                                 ) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text(" Please enter all required information")),
-                              );
+                              showCustomToast(context, "Please Enter the Required Information");
                               return;
                             }
 
 
                             if (employeePhone.length != 11 || int.tryParse(employeePhone) == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text(" Phone number must be 11 digits")),
-                              );
+                              showCustomToast(context, "Phone Number must be 11 digits");
                               return;
                             }
 
-
+                            setState(() {
+                              _isLoading = true; // Start loading
+                            });
                             try {
                               await EmployeeService().addEmployee(
                                name: employeeName,
@@ -169,9 +171,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                                   context: context
                               );
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Employee data saved successfully")),
-                              );
+                              showCustomToast(context, "Employee Data saved successfully");
 
 
                               _phoneNumberController.clear();
@@ -179,6 +179,11 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                               _nameController.clear();
                             } catch (e) {
                               print(e.toString());
+
+                            } finally {
+                              setState(() {
+                                _isLoading = false; // Stop loading
+                              });
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -189,12 +194,18 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text(
-                            'Save Entry',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                          child: _isLoading
+                              ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
                             ),
+                          )
+                              : const Text(
+                            'Save Entry',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -230,58 +241,5 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
     );
   }
 
-  Widget _buildInputField({
-    required String label,
-    TextEditingController? controller,
-    IconData? icon,
-    TextInputType? keyboardType,
-    int maxLines = 1,
-    bool readOnly = false,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          maxLines: maxLines,
-          readOnly: readOnly,
-          onTap: onTap,
-          validator: (value) {
-            if (!readOnly && (value?.isEmpty ?? true)) {
-              return 'Please enter $label';
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-            prefixIcon: icon != null
-                ? Icon(icon, color: Colors.grey[400])
-                : null,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF4CAF50)),
-            ),
-            contentPadding: const EdgeInsets.all(16.0),
-            isDense: true,
-            filled: true,
-            fillColor: Colors.white,
-          ),
-        ),
-      ],
-    );
-  }
+ 
 }

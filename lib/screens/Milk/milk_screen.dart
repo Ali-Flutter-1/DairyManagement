@@ -49,7 +49,7 @@ class _MilkScreenState extends State<MilkScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.15),
+                      color: Colors.grey.withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 3),
                     ),
@@ -171,7 +171,7 @@ class _MilkScreenState extends State<MilkScreen> {
               ],
             ),
         
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
 
 
             Expanded(
@@ -208,7 +208,7 @@ class _MilkScreenState extends State<MilkScreen> {
                   }
 
                   final sales = snapshot.data!;
-
+                  sales.sort((a, b) => b.date.compareTo(a.date));
                   return ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: sales.length,
@@ -221,127 +221,108 @@ class _MilkScreenState extends State<MilkScreen> {
 
 
                       return Container(
-                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFB9F6CA), // light mint green
-                              Color(0xFF7CB342), // your original green
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+
+                          color:  Colors.white,
+
+
+
+
+
+
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
                             ),
                           ],
                         ),
-                        child: Card(
-                          elevation: 0,
-                          margin: EdgeInsets.zero,
-                          color: Colors.transparent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Milk Icon
-                                Container(
-                                  height: 50,
-                                  width: 50,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.local_drink, color: Colors.green),
-                                ),
-                                const SizedBox(width: 16),
-
-                                // Details
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
+                          children: [
+                            Container(
+                              height: 50,
+                              width: 50,
+                              decoration: const BoxDecoration(
+                                color: Colors.white70,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.local_drink, color: Color(0xFF7CB342)),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      // Customer + Price
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            sale.customer,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            "Rs ${totalPrice.toStringAsFixed(2)}",
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-
-                                      // Morning & Evening quantities
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.wb_sunny, color: Colors.yellow, size: 18),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            "${sale.morningQuantity} L",
-                                            style: const TextStyle(color: Colors.white, fontSize: 14),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          const Icon(Icons.nightlight_round, color: Colors.blueAccent, size: 18),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            "${sale.eveningQuantity} L",
-                                            style: const TextStyle(color: Colors.white, fontSize: 14),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-
-                                      // Price per litre
                                       Text(
-                                        "Price/Litre: Rs ${sale.pricePerLitre}",
-                                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                                      ),
-
-                                      // Date
-                                      Text(
-                                        "Date: $formattedDate",
-                                        style: const TextStyle(color: Colors.white70, fontSize: 13),
-                                      ),
-
-                                      // Notes
-                                      if (sale.notes.isNotEmpty)
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 4),
-                                          child: Text(
-                                            "Notes: ${sale.notes}",
-                                            style: const TextStyle(
-                                              color: Colors.white70,
-                                              fontStyle: FontStyle.italic,
-                                              fontSize: 13,
-                                            ),
-                                          ),
+                                        sale.customer,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
+                                      ),
+                                      Text(
+                                        "Rs ${totalPrice.toStringAsFixed(2)}",
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.wb_sunny,
+                                        color: Colors.yellow,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "${sale.morningQuantity} L",
+                                        style: const TextStyle(color: Colors.black),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Icon(
+                                        Icons.nightlight_round,
+                                        color: Colors.blueAccent,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        "${sale.eveningQuantity} L",
+                                        style: const TextStyle(color: Colors.black),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Date: $formattedDate",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Price/Litre: Rs ${sale.pricePerLitre}",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       );
                     },
