@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> addUserData({
     required String farmName,
@@ -10,38 +11,20 @@ class FirebaseService {
     required String ownerNumber,
     required double pricePerLiter,
   }) async {
-    // Check if data already exists
-    final existingData = await _firestore.collection('users').limit(1).get();
+    final uid = _auth.currentUser!.uid;
 
-    if (existingData.docs.isNotEmpty) {
-      // Update existing document
-      await existingData.docs.first.reference.update({
-        'farmName': farmName,
-        'ownerName': ownerName,
-        'ownerNumber': ownerNumber,
-        'pricePerLiter': pricePerLiter,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } else {
-      // Add new document if none exists
-      await _firestore.collection('users').add({
-        'farmName': farmName,
-        'ownerName': ownerName,
-        'ownerNumber': ownerNumber,
-        'pricePerLiter': pricePerLiter,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    }
+    await _firestore.collection('users').doc(uid).set({
+      'farmName': farmName,
+      'ownerName': ownerName,
+      'ownerNumber': ownerNumber,
+      'pricePerLiter': pricePerLiter,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
-  // Fetch existing data (for pre-filling)
   Future<Map<String, dynamic>?> getUserData() async {
-    final snapshot = await _firestore.collection('users').limit(1).get();
-    if (snapshot.docs.isNotEmpty) {
-      return snapshot.docs.first.data();
-    }
-    return null;
+    final uid = _auth.currentUser!.uid;
+    final snapshot = await _firestore.collection('users').doc(uid).get();
+    return snapshot.data();
   }
-
-
 }

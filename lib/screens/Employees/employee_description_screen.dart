@@ -111,9 +111,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                         label: 'Employee Name',
                         controller: _nameController,
 
-                        keyboardType: TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
+                        keyboardType: TextInputType.name
                       ),
                       const SizedBox(height: 16),
                       CustomInnerInputField(

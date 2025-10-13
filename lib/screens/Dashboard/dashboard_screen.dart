@@ -331,7 +331,7 @@ class DashboardScreen extends StatelessWidget {
           return const Center(
             child: Text(
               'No sales recorded',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.black,fontFamily: 'Font',fontWeight: FontWeight.bold,fontSize: 16),
             ),
           );
         }

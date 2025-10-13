@@ -3,7 +3,8 @@ import 'package:dairyapp/Provider/category_provider.dart';
 import 'package:dairyapp/Provider/expense_provider.dart';
 import 'package:dairyapp/Provider/milk_provider.dart';
 import 'package:dairyapp/Provider/salary_provider.dart';
-import 'package:dairyapp/screens/BottomNavBar/bottom_nav.dart';
+
+import 'package:dairyapp/splash/splash_screen.dart';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,9 +23,9 @@ void main() async {
       builder: (context) => MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => FarmProvider()..loadFarmData()),
-          ChangeNotifierProvider(create: (_)=>ExpenseProvider()..fetchMonthlyExpense()),
+          ChangeNotifierProvider(create: (_)=>ExpenseProvider()),
           ChangeNotifierProvider(create: (_)=>MilkProvider()..fetchMilkSales()),
-          ChangeNotifierProvider(create: (_)=>EmployeeSalaryProvider()..fetchTotalSalaries()),
+          ChangeNotifierProvider(create: (_)=>EmployeeSalaryProvider()),
           ChangeNotifierProvider(create: (_)=>CategoryProvider()..fetchCategories()),
         ],
         child: const MyApp(),
@@ -45,7 +46,7 @@ class MyApp extends StatelessWidget {
 
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:BottomBar() ,
+      home:DairySplashScreen() ,
     );
   }
 }
