@@ -43,7 +43,7 @@ class _DairySplashScreenState extends State<DairySplashScreen>
     )..forward();
 
     // Navigation after splash
-    Future.delayed(const Duration(seconds: 1), () async {
+    Future.delayed(const Duration(seconds: 4), () async {
 
       Navigator.pushReplacement(
         context,

@@ -13,7 +13,7 @@ class EmployeeService {
   Future<void> addEmployee({
     required String name,
     required double salary,
-    required String phone,
+           String? phone,
     required BuildContext context,
   }) async {
     await employees.add({

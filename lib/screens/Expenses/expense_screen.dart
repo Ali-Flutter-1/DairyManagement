@@ -447,7 +447,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                             ),
                           ),
                           title: Text(
-                            data['description'] ?? 'No Description',
+                            data['description'] ?? '',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -511,12 +511,18 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       floatingActionButton: FloatingActionButton(
         heroTag: 'add_expense',
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ExpenseDescriptionScreen(),
-            ),
-          );
+          final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+          if(categoryProvider.categories.isEmpty){
+            _showAddCategoryDialog(context);
+          }
+          else{
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ExpenseDescriptionScreen(),
+              ),
+            );
+          }
         },
         backgroundColor: const Color(0xFF7CB342),
         child: const Icon(Icons.add, size: 30, color: Colors.white),
@@ -572,13 +578,20 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
           ),
           const SizedBox(height: 25),
           ElevatedButton(
+
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const ExpenseDescriptionScreen(),
-                ),
-              );
+              final categoryProvider = Provider.of<CategoryProvider>(context, listen: false);
+              if(categoryProvider.categories.isEmpty){
+                _showAddCategoryDialog(context);
+              }
+             else{
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ExpenseDescriptionScreen(),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7CB342),

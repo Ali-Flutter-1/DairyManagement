@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,12 +9,29 @@ class EmployeeSalaryProvider with ChangeNotifier {
 
   StreamSubscription<QuerySnapshot>? _subscription;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? _currentUid;
 
   EmployeeSalaryProvider() {
-    _listenEmployeeSalaries();
+    _auth.authStateChanges().listen((user) {
+      if (user == null) {
+        if (_currentUid != null) {
+          clear();
+        }
+        _currentUid = null;
+      } else {
+        final newUid = user.uid;
+        if (_currentUid != newUid) {
+          clear();
+          _currentUid = newUid;
+        }
+        _listenEmployeeSalaries();
+      }
+    });
   }
 
   void _listenEmployeeSalaries() {
+    _subscription?.cancel();
+
     final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
@@ -32,6 +48,12 @@ class EmployeeSalaryProvider with ChangeNotifier {
       _totalSalaries = total;
       notifyListeners();
     });
+  }
+
+  void clear() {
+    _subscription?.cancel();
+    _totalSalaries = 0.0;
+    notifyListeners();
   }
 
   @override

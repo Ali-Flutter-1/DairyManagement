@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,17 +9,31 @@ class ExpenseProvider extends ChangeNotifier {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
   StreamSubscription<QuerySnapshot>? _subscription;
+  String? _currentUid;
 
   ExpenseProvider() {
-    _listenExpenses();
+    _auth.authStateChanges().listen((user) {
+      if (user == null) {
+        if (_currentUid != null) {
+          clear();
+        }
+        _currentUid = null;
+      } else {
+        final newUid = user.uid;
+        if (_currentUid != newUid) {
+          clear();
+          _currentUid = newUid;
+        }
+        _listenExpenses();
+      }
+    });
   }
 
-  String? get _uid => _auth.currentUser?.uid;
-
   void _listenExpenses() {
-    final uid = _uid;
+    _subscription?.cancel();
+
+    final uid = _auth.currentUser?.uid;
     if (uid == null) return;
 
     final now = DateTime.now();
@@ -30,7 +43,8 @@ class ExpenseProvider extends ChangeNotifier {
         .collection('users')
         .doc(uid)
         .collection('expenses')
-        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
+        .where('createdAt',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
         .snapshots()
         .listen((snapshot) {
       double total = 0;
@@ -40,6 +54,12 @@ class ExpenseProvider extends ChangeNotifier {
       _monthlyExpense = total;
       notifyListeners();
     });
+  }
+
+  void clear() {
+    _subscription?.cancel();
+    _monthlyExpense = 0.0;
+    notifyListeners();
   }
 
   @override

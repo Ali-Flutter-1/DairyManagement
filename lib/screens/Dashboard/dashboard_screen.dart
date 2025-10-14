@@ -25,10 +25,10 @@ class DashboardScreen extends StatelessWidget {
     final double monthlyIncome = milkProvider.monthlyRevenue;
     final double todayRevenue = milkProvider.todayRevenue;
     final double todayLiter = milkProvider.totalLitres;
-    final double totalMorningLiter = milkProvider.todayMorningLitres;
+    final double totalMorningLiter = milkProvider.totalMorningLitres;
     final double totalEveningLiter = milkProvider.totalEveningLitres;
     final double totalSalary = salaryProvider.totalSalaries;
-
+    final double totalExpense=monthlyExpense+totalSalary;
     final date = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
 
     String getMonthlyProfitText() {
@@ -48,7 +48,7 @@ class DashboardScreen extends StatelessWidget {
 
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
           'Dashboard',
@@ -169,14 +169,16 @@ class DashboardScreen extends StatelessWidget {
               _InfoCard(
                 icon: Icons.receipt_long,
                 title: 'Monthly Expenses',
-                value: 'Rs ${monthlyExpense.toStringAsFixed(2)}',
+                value: 'Rs ${totalExpense.toStringAsFixed(2)}',
+                valueColor: Colors.red, // 🔴 Expense value in red
               ),
               _InfoCard(
                 icon: Icons.trending_up,
                 title: 'Monthly Profit',
-                value: getMonthlyProfitText(),
+                value: 'Rs ${getMonthlyProfitText()}', // 💰 Added Rs before profit
                 valueColor: getMonthlyProfitColor(),
               ),
+
 
               const SizedBox(height: 20),
               // Recent Milk Entries Header

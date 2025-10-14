@@ -154,13 +154,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 password.isEmpty ||
                                 confirmPassword.isEmpty) {
                               showCustomToast(
-                                  context, 'Please fill all fields');
+                                  context, 'Please fill all fields',isError: true);
                               return;
                             }
 
                             if (password != confirmPassword) {
                               showCustomToast(
-                                  context, 'Passwords do not match!');
+                                  context, 'Passwords do not match!',isError: true);
                               return;
                             }
 
@@ -181,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               );
                             } else {
                               showCustomToast(context,
-                                  result ?? "An unknown error occurred");
+                                  result ?? "An unknown error occurred",isError: true);
                             }
                           },
                           child: _isLoading

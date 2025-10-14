@@ -33,7 +33,7 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: InkWell(
           onTap: () {
@@ -96,6 +96,14 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1), // soft grey shadow
+                      blurRadius: 8, // how soft the shadow looks
+                      spreadRadius: 2, // how far it spreads
+                      offset: const Offset(0, 3), // slightly below the container
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -136,51 +144,59 @@ class _EmployeeDescriptionScreenState extends State<EmployeeDescriptionScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _isLoading?null:()
-                          async {
-                            String employeeName = _nameController.text.trim();
-                            String employeeSalary = _salaryController.text.trim();
-                            String employeePhone = _phoneNumberController.text.trim();
-
-
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                            final employeeName =
+                            _nameController.text.trim();
+                            final employeeSalary =
+                            _salaryController.text.trim();
+                            final employeePhone =
+                            _phoneNumberController.text.trim();
 
                             if (employeeName.isEmpty ||
-                                employeeSalary.isEmpty ||
-                                employeePhone.isEmpty
-                                ) {
-                              showCustomToast(context, "Please Enter the Required Information");
+                                employeeSalary.isEmpty) {
+                              showCustomToast(context,
+                                  "Please enter the required information",isError: true);
                               return;
                             }
 
-
-                            if (employeePhone.length != 11 || int.tryParse(employeePhone) == null) {
-                              showCustomToast(context, "Phone Number must be 11 digits");
+                            // ✅ Phone number validation only if not empty
+                            if (employeePhone.isNotEmpty &&
+                                (employeePhone.length != 11 ||
+                                    int.tryParse(employeePhone) == null)) {
+                              showCustomToast(context,
+                                  "Phone number must be 11 digits",isError: true);
                               return;
                             }
 
                             setState(() {
-                              _isLoading = true; // Start loading
+                              _isLoading = true;
                             });
+
                             try {
                               await EmployeeService().addEmployee(
-                               name: employeeName,
-                                salary: double.tryParse(_salaryController.text) ?? 0.0,
-                                phone: employeePhone,
-                                  context: context
+                                name: employeeName,
+                                salary: double.tryParse(employeeSalary) ??
+                                    0.0,
+                                phone: employeePhone.isEmpty
+                                    ? null
+                                    : employeePhone,
+                                context: context,
                               );
 
-                              showCustomToast(context, "Employee Data saved successfully");
-
+                              showCustomToast(context,
+                                  "Employee data saved successfully");
 
                               _phoneNumberController.clear();
                               _salaryController.clear();
                               _nameController.clear();
                             } catch (e) {
-                              print(e.toString());
-
+                              showCustomToast(context,
+                                  "Error saving employee: $e",isError: true);
                             } finally {
                               setState(() {
-                                _isLoading = false; // Stop loading
+                                _isLoading = false;
                               });
                             }
                           },

@@ -80,7 +80,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
 
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: InkWell(onTap: (){
           Navigator.pop(context);
@@ -137,10 +137,18 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
               ),
               const SizedBox(height: 32),
               Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1), // soft grey shadow
+                        blurRadius: 8, // how soft the shadow looks
+                        spreadRadius: 2, // how far it spreads
+                        offset: const Offset(0, 3), // slightly below the container
+                      ),
+                    ],
+                  ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 20.0,
@@ -254,7 +262,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                           final notes = _notesController.text.trim();
 
                           if (quantity <= 0) {
-                            showCustomToast(context, "Please enter a valid milk quantity");
+                            showCustomToast(context, "Please enter a valid milk quantity",isError: true);
                             return;
                           }
 
@@ -270,7 +278,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
 
 
                           if (price <= 0) {
-                            showCustomToast(context, "Invalid price. Please enter or use default price.");
+                            showCustomToast(context, "Invalid price. Please enter or use default price.",isError: true);
                             return;
                           }
 
@@ -291,7 +299,7 @@ class _MilkDescriptionScreenState extends State<MilkDescriptionScreen> {
                             _notesController.clear();
                             Navigator.pop(context);
                           } catch (e) {
-                            showCustomToast(context, "Error :$e");
+                            showCustomToast(context, "Error :$e",isError: true);
                           } finally {
                             setState(() {
                               _isLoading = false; // Stop loading

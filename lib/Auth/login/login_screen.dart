@@ -2,13 +2,14 @@ import 'package:dairyapp/Auth/forgetPassword/forget_screen.dart';
 
 import 'package:dairyapp/Auth/register/register_screen.dart';
 import 'package:dairyapp/screens/BottomNavBar/bottom_nav.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
 
 import '../../CustomWidets/custom_text_field.dart';
 import '../../CustomWidets/custom_toast.dart';
 import '../firebase/firebase_auth.dart';
+import '../google/google_signin.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +23,23 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController passwordController = TextEditingController();
 
   bool _isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  void _checkLoginStatus() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BottomBar()),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,14 +200,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               passwordController.text.trim();
 
                               if (email.isEmpty || password.isEmpty) {
-                                showCustomToast(context, 'Please fill all required fields');
+                                showCustomToast(context, 'Please fill all required fields',isError: true);
                                 return;
                               }
 
                               setState(() => _isLoading = true);
 
                               String? result = await AuthService()
-                                  .login(email, password);
+                                  .login(email, password,context);
 
                               setState(() => _isLoading = false);
 
@@ -204,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               } else {
                                 showCustomToast(context,
-                                    result ?? "An unknown error occurred");
+                                    result ?? "An unknown error occurred",isError: true);
                               }
                             },
                             child: _isLoading
@@ -282,11 +300,24 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             onPressed: () async {
-                              // var user = await GoogleSignInService.signInWithGoogle();
-                              // if (user != null) {
-                              //
-                              //   print('Signed in as: ${user.displayName}');
-                              // }
+                              // Show loading indicator
+                              setState(() => _isLoading = true);
+
+                              var user = await GoogleAuthService().signInWithGoogle(context);
+
+                              setState(() => _isLoading = false);
+
+                              if (user != null) {
+                                showCustomToast(context, 'Login Successful');
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const BottomBar(), // ✅ Dashboard screen
+                                  ),
+                                );
+                              } else {
+                                showCustomToast(context, 'Google Sign-In failed',isError: true);
+                              }
                             },
                           ),
                         ),

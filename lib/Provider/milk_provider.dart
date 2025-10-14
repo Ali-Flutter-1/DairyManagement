@@ -1,18 +1,41 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../Firebase/milk_service.dart';
 import '../Model/milk_model.dart';
-
-
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MilkProvider with ChangeNotifier {
   final MilkService _milkService = MilkService();
-  List<MilkSale> _milkSales = [];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  List<MilkSale> _milkSales = [];
+  StreamSubscription<List<MilkSale>>? _subscription;
+  String? _currentUid;
 
   List<MilkSale> get milkSales => _milkSales;
 
+  MilkProvider() {
+    _auth.authStateChanges().listen((user) {
+      if (user == null) {
+        if (_currentUid != null) {
+          clear();
+        }
+        _currentUid = null;
+      } else {
+        final newUid = user.uid;
+        if (_currentUid != newUid) {
+          clear();
+          _currentUid = newUid;
+        }
+        fetchMilkSales();
+      }
+    });
+  }
+
   void fetchMilkSales() {
-    _milkService.getAllMilkSales().listen((sales) {
+    _subscription?.cancel();
+    _subscription = _milkService.getAllMilkSales().listen((sales) {
       _milkSales = sales;
       notifyListeners();
     });
@@ -20,28 +43,30 @@ class MilkProvider with ChangeNotifier {
 
   Future<void> addMilkSale(MilkSale sale) async {
     await _milkService.addMilkSale(sale);
-    fetchMilkSales();
   }
 
   double get totalMorningLitres =>
       _milkSales.fold(0, (sum, s) => sum + s.morningQuantity);
-
   double get totalEveningLitres =>
       _milkSales.fold(0, (sum, s) => sum + s.eveningQuantity);
-
   double get totalLitres => totalMorningLitres + totalEveningLitres;
 
-  double get totalRevenue =>
-      _milkSales.fold(0, (sum, s) => sum + ((s.morningQuantity + s.eveningQuantity) * s.pricePerLitre));
+  double get totalRevenue => _milkSales.fold(
+      0,
+          (sum, s) =>
+      sum +
+          ((s.morningQuantity + s.eveningQuantity) * s.pricePerLitre));
 
   double get monthlyRevenue {
     final now = DateTime.now();
-    final currentMonthSales = _milkSales.where((s) =>
-    s.date.month == now.month && s.date.year == now.year);
+    final currentMonthSales =
+    _milkSales.where((s) => s.date.month == now.month && s.date.year == now.year);
 
     return currentMonthSales.fold(
       0,
-          (sum, s) => sum + ((s.morningQuantity + s.eveningQuantity) * s.pricePerLitre),
+          (sum, s) =>
+      sum +
+          ((s.morningQuantity + s.eveningQuantity) * s.pricePerLitre),
     );
   }
 
@@ -62,28 +87,23 @@ class MilkProvider with ChangeNotifier {
     s.date.year == today.year &&
         s.date.month == today.month &&
         s.date.day == today.day)
-        .fold(0.0, (sum, s) =>
-    sum + ((s.morningQuantity + s.eveningQuantity) * s.pricePerLitre));
+        .fold(
+        0.0,
+            (sum, s) =>
+        sum +
+            ((s.morningQuantity + s.eveningQuantity) *
+                s.pricePerLitre));
   }
 
-
-  double get todayMorningLitres {
-    final today = DateTime.now();
-    return _milkSales
-        .where((s) => s.date.year == today.year &&
-        s.date.month == today.month &&
-        s.date.day == today.day)
-        .fold(0, (sum, s) => sum + s.morningQuantity);
+  void clear() {
+    _subscription?.cancel();
+    _milkSales.clear();
+    notifyListeners();
   }
 
-  double get todayEveningLitres {
-    final today = DateTime.now();
-    return _milkSales
-        .where((s) => s.date.year == today.year &&
-        s.date.month == today.month &&
-        s.date.day == today.day)
-        .fold(0, (sum, s) => sum + s.eveningQuantity);
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
-
-
 }

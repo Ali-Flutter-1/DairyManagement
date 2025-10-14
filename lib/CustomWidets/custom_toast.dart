@@ -5,25 +5,33 @@ import 'package:flutter/material.dart';
 
 void showCustomToast(BuildContext context, String message,
     {bool isError = false}) {
+  // Define background and icon colors based on error state
+  final Color backgroundColor = isError ?  Colors.red :  Colors.green;
+  final Color iconColor = Colors.white;
+  final Color textColor = Colors.white;
+
   DelightToastBar(
     builder: (context) {
       return ToastCard(
-        shadowColor: isError ? Colors.red : Color(0xFF7CB342),
+        shadowColor: Colors.transparent, // No shadow
+        color: backgroundColor, // Background color
         title: Text(
           message,
           style: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 14,
+            color: Colors.white, // Always white text
           ),
         ),
         leading: Icon(
           isError ? Icons.error : Icons.check_circle,
-          size: 28,
-          color: isError ? Colors.red : Color(0xFF7CB342),
+          size: 26,
+          color: iconColor, // Always white icon
         ),
       );
     },
-    position: DelightSnackbarPosition.top,
+    position: DelightSnackbarPosition.bottom,
     autoDismiss: true,
+
   ).show(context);
 }

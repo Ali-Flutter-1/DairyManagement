@@ -11,7 +11,7 @@ class ExpenseService {
   Future<void> addExpense({
     required String category,
     required double amount,
-    required String description,
+     String? description,
   }) async {
     await _userExpenses.add({
       'category': category,

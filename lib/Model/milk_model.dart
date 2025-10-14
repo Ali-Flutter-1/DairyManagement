@@ -4,7 +4,7 @@ class MilkSale {
   final double morningQuantity;
   final double eveningQuantity;
   final double pricePerLitre;
-  final String notes;
+  final String? notes;
   final String customer;
   final DateTime date;
   final DateTime createdAt;
@@ -13,7 +13,7 @@ class MilkSale {
     required this.morningQuantity,
     required this.eveningQuantity,
     required this.pricePerLitre,
-    required this.notes,
+     this.notes,
     required this.customer,
     required this.date,
     required this.createdAt,

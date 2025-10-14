@@ -42,17 +42,17 @@ bool _isLoading=false;
     String amountText = _priceController.text.trim();
     String description = _descriptionController.text.trim();
     if (expenseCatogary == null || expenseCatogary.isEmpty) {
-      showCustomToast(context, "Please Select an expense category");
+      showCustomToast(context, "Please Select an expense category",isError: true);
       return;
     }
-    if (amountText.isEmpty || description.isEmpty) {
-      showCustomToast(context, "Please Enter the Required Information");
+    if (amountText.isEmpty ) {
+      showCustomToast(context, "Please Enter the amount",isError: true);
       return;
     }
 
     double? amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) {
-      showCustomToast(context, "Enter a valid Amount");
+      showCustomToast(context, "Enter a valid Amount",isError: true);
       return;
     }
     setState(() {
@@ -63,14 +63,14 @@ bool _isLoading=false;
         category: expenseCatogary,
         amount: amount,
 
-        description: description,
+        description: description.isEmpty?null:description,
 
       );
 
       showCustomToast(context, "Expense Added Successfully");
       Navigator.pop(context);
     } catch (e) {
-      showCustomToast(context, "Error :$e");
+      showCustomToast(context, "Error :$e",isError: true);
     }
     finally {
       setState(() {
@@ -82,7 +82,7 @@ bool _isLoading=false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade200,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: InkWell(
           onTap: () {
@@ -144,6 +144,14 @@ bool _isLoading=false;
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1), // soft grey shadow
+                      blurRadius: 8, // how soft the shadow looks
+                      spreadRadius: 2, // how far it spreads
+                      offset: const Offset(0, 3), // slightly below the container
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(

@@ -1,8 +1,11 @@
 
+import 'package:dairyapp/Auth/login/login_screen.dart';
 import 'package:dairyapp/CustomWidets/custom_text_field.dart';
 import 'package:dairyapp/CustomWidets/custom_toast.dart';
 import 'package:dairyapp/Firebase/firebase_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:provider/provider.dart';
 
@@ -20,7 +23,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   TextEditingController ownerNameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController   milkPriceController=TextEditingController();
-  bool _isLoading=false;
+  bool _isSaving = false; // for Save Settings
+  bool _isLoggingOut = false; // for Logout button (optional if you want loader outside dialog)
+
 
   @override
   void initState() {
@@ -48,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     }
     return Scaffold(
-      backgroundColor:Colors.grey.shade200,
+      backgroundColor:Colors.white,
       appBar: AppBar(
         title: const Text(
           "Settings",
@@ -144,10 +149,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                 decoration: BoxDecoration(
+                   color: Colors.white,
+                   borderRadius: BorderRadius.circular(10),
+                   boxShadow: [
+                     BoxShadow(
+                       color: Colors.black.withValues(alpha: 0.1), // soft grey shadow
+                       blurRadius: 8, // how soft the shadow looks
+                       spreadRadius: 2, // how far it spreads
+                       offset: const Offset(0, 3), // slightly below the container
+                     ),
+                   ],
+                 ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       vertical: 20.0,
@@ -223,6 +236,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1), // soft grey shadow
+                      blurRadius: 8, // how soft the shadow looks
+                      spreadRadius: 2, // how far it spreads
+                      offset: const Offset(0, 3), // slightly below the container
+                    ),
+                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -250,37 +271,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed:_isLoading?null: () async {
+                          onPressed: _isSaving
+                              ? null
+                              : () async {
+                            setState(() {
+                              _isSaving = true;
+                            });
+
                             String farmName = farmNameController.text.trim();
                             String ownerName = ownerNameController.text.trim();
                             String phoneNumber = phoneNumberController.text.trim();
                             String priceText = milkPriceController.text.trim();
 
-
                             if (farmName.isEmpty ||
                                 ownerName.isEmpty ||
                                 phoneNumber.isEmpty ||
                                 priceText.isEmpty) {
-                            showCustomToast(context, "Please Enter the Required Information");
+                              showCustomToast(context, "Please enter all required information",isError: true);
+                              setState(() => _isSaving = false);
                               return;
                             }
-
 
                             if (phoneNumber.length != 11 || int.tryParse(phoneNumber) == null) {
-                              showCustomToast(context, "Phone Number Must be 11 digits");
+                              showCustomToast(context, "Phone number must be 11 digits",isError: true);
+                              setState(() => _isSaving = false);
                               return;
                             }
-
 
                             double? price = double.tryParse(priceText);
                             if (price == null || price <= 0) {
-                              showCustomToast(context, "Enter a Valid Milk Price");
+                              showCustomToast(context, "Enter a valid milk price",isError: true);
+                              setState(() => _isSaving = false);
                               return;
                             }
 
-                            setState(() {
-                              _isLoading = false; // Stop loading
-                            });
                             try {
                               await FirebaseService().addUserData(
                                 farmName: farmName,
@@ -288,28 +312,188 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ownerNumber: phoneNumber,
                                 pricePerLiter: price,
                               );
-                              await Provider.of<FarmProvider>(context, listen: false).loadFarmData();
+                              await Provider.of<FarmProvider>(context, listen: false)
+                                  .loadFarmData();
 
-                              showCustomToast(context, "Form Data Saved Successfully");
-
-
-
+                              showCustomToast(context, "Form data saved successfully");
                             } catch (e) {
-                             print(e.toString());
-                             showCustomToast(context, "Error");
-                            }finally {
+                              showCustomToast(context, "Error saving data",isError: true);
+                            } finally {
                               setState(() {
-                                _isLoading = false; // Stop loading
+                                _isSaving = false;
                               });
                             }
                           },
-
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:  const Color(0xFF7CB342),
+                            backgroundColor: const Color(0xFF7CB342),
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: _isSaving
+                              ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                              : const Text(
+                            'Save Settings',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+
+                      SizedBox(height: 16,),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoggingOut ? null : () => _showLogoutDialog(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Logout',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+
+                    ],
+                  ),
+                ),
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  void _showLogoutDialog(BuildContext context) {
+    bool _isLoading = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // prevent accidental close
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.logout, color: Color(0xFF7CB342), size: 48),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Font1',
+                        color: Color(0xFF33691E),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Are you sure you want to logout?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white24,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                          ),
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                            setStateDialog(() {
+                              _isLoading = true;
+                            });
+
+                            try {
+                              // 🔥 Sign out from Firebase
+                              await FirebaseAuth.instance.signOut();
+
+                              // ✅ Optional: also sign out from Google
+                              await GoogleSignIn().signOut();
+
+                              // Show confirmation toast
+                              showCustomToast(context, "Logged out successfully");
+
+
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                    (route) => false,
+                              );
+                            } catch (e) {
+                              showCustomToast(context, "Error: ${e.toString()}",isError: true);
+                            } finally {
+                              setStateDialog(() {
+                                _isLoading = false;
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF7CB342),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: _isLoading
@@ -322,20 +506,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           )
                               : const Text(
-                            'Save Entry',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                            "Logout",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: 'Font1',
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-
-            ],
-          ),
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
