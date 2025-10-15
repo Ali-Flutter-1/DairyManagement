@@ -95,6 +95,25 @@ class MilkProvider with ChangeNotifier {
                 s.pricePerLitre));
   }
 
+  Map<DateTime, double> get dailyRevenue {
+    Map<DateTime, double> revenueMap = {};
+
+    for (var sale in _milkSales) {
+      // Normalize date (remove time)
+      final dateKey = DateTime(sale.date.year, sale.date.month, sale.date.day);
+      final revenue = (sale.morningQuantity + sale.eveningQuantity) * sale.pricePerLitre;
+
+      if (revenueMap.containsKey(dateKey)) {
+        revenueMap[dateKey] = revenueMap[dateKey]! + revenue;
+      } else {
+        revenueMap[dateKey] = revenue;
+      }
+    }
+
+    return revenueMap;
+  }
+
+
   void clear() {
     _subscription?.cancel();
     _milkSales.clear();

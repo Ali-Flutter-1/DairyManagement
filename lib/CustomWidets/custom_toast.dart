@@ -8,7 +8,7 @@ void showCustomToast(BuildContext context, String message,
   // Define background and icon colors based on error state
   final Color backgroundColor = isError ?  Colors.red :  Colors.green;
   final Color iconColor = Colors.white;
-  final Color textColor = Colors.white;
+
 
   DelightToastBar(
     builder: (context) {

@@ -214,12 +214,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (result == "Success") {
                                 showCustomToast(
                                     context, 'Login Successfully');
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const BottomBar(),
-                                  ),
-                                );
+                                // Navigator.pushReplacement(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) => const BottomBar(),
+                                //   ),
+                                // );
                               } else {
                                 showCustomToast(context,
                                     result ?? "An unknown error occurred",isError: true);

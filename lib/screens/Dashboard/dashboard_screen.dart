@@ -4,6 +4,8 @@ import 'package:dairyapp/Provider/salary_provider.dart';
 import 'package:dairyapp/screens/Employees/employee_description_screen.dart';
 import 'package:dairyapp/screens/Expenses/expense_description_screen.dart';
 import 'package:dairyapp/screens/Milk/milk_description_screen.dart';
+import 'package:fl_chart/fl_chart.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -149,8 +151,13 @@ class DashboardScreen extends StatelessWidget {
               // Morning & Evening Milk Info
               buildLiterInfo(context, totalMorningLiter, totalEveningLiter),
 
+
               const SizedBox(height: 10),
-              // Dashboard Cards
+              revenueExpenseLineChart(context),
+              const SizedBox(height: 20),
+
+
+
               _InfoCard(
                 icon: Icons.local_drink,
                 title: "Today's Litres",
@@ -222,6 +229,193 @@ class DashboardScreen extends StatelessWidget {
               recentMilkEntries(context),
             ],
           ),
+        ),
+      ),
+    );
+  }
+  Widget revenueExpenseLineChart(BuildContext context) {
+    final expenseProvider = Provider.of<ExpenseProvider>(context);
+    final milkProvider = Provider.of<MilkProvider>(context);
+    final salaryProvider = Provider.of<EmployeeSalaryProvider>(context);
+
+    // Use your real maps for daily data
+    final Map<DateTime, double> expenseMap = expenseProvider.dailyExpenses;
+    final Map<String, double> salaryMap = salaryProvider.dailySalaryData;
+    final Map<DateTime, double> milkMap = milkProvider.dailyRevenue.cast<DateTime, double>();
+
+    // Convert salaryMap keys (String) to DateTime for merging
+    final salaryDateMap = <DateTime, double>{};
+    for (var entry in salaryMap.entries) {
+      final parsedDate = DateTime.tryParse(entry.key);
+      if (parsedDate != null) salaryDateMap[parsedDate] = entry.value;
+    }
+
+    // Combine all unique dates
+    final allDates = <DateTime>{
+      ...milkMap.keys,
+      ...expenseMap.keys,
+      ...salaryDateMap.keys,
+    }.toList()
+      ..sort();
+
+    if (allDates.isEmpty) {
+      return const Center(child: Text("No data available"));
+    }
+
+    // Find the maximum value for better scaling
+    double maxValue = 0;
+    for (final date in allDates) {
+      final revenue = milkMap[date] ?? 0;
+      final expense = (expenseMap[date] ?? 0) + (salaryDateMap[date] ?? 0);
+      maxValue = maxValue > revenue ? maxValue : revenue;
+      maxValue = maxValue > expense ? maxValue : expense;
+    }
+
+    // Build bar groups
+    final barGroups = <BarChartGroupData>[];
+    for (int i = 0; i < allDates.length; i++) {
+      final date = allDates[i];
+      final revenue = milkMap[date] ?? 0;
+      final expense = (expenseMap[date] ?? 0) + (salaryDateMap[date] ?? 0);
+
+      barGroups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: revenue,
+              color: Colors.green,
+              width: 14,
+              borderRadius: BorderRadius.circular(6),
+              gradient: const LinearGradient(
+                colors: [Colors.green, Colors.lightGreen],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
+            ),
+            BarChartRodData(
+              toY: expense,
+              color: Colors.redAccent,
+              width: 14,
+              borderRadius: BorderRadius.circular(6),
+              gradient: const LinearGradient(
+                colors: [Colors.red, Colors.redAccent],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Function to format Y-axis labels
+    String formatYAxisValue(double value) {
+      if (value >= 1000000) {
+        return '${(value / 1000000).toStringAsFixed(1)}M';
+      } else if (value >= 1000) {
+        return '${(value / 1000).toStringAsFixed(0)}k';
+      } else {
+        return value.toInt().toString();
+      }
+    }
+
+    // Chart UI
+    return Container(
+      height: 300,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: BarChart(
+        BarChartData(
+          barGroups: barGroups,
+          alignment: BarChartAlignment.spaceAround,
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          ),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            horizontalInterval: maxValue / 5,
+            getDrawingHorizontalLine: (value) => FlLine(
+              color: Colors.grey.withOpacity(0.2),
+              strokeWidth: 1,
+            ),
+          ),
+          titlesData: FlTitlesData(
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 50,
+                interval: maxValue / 5,
+                getTitlesWidget: (value, meta) => Text(
+                  formatYAxisValue(value),
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+              ),
+            ),
+            rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  if (value.toInt() >= 0 && value.toInt() < allDates.length) {
+                    final date = allDates[value.toInt()];
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        "${date.day}/${date.month}",
+                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+          barTouchData: BarTouchData(
+            enabled: true,
+            touchTooltipData: BarTouchTooltipData(
+              tooltipBgColor: Colors.black87,
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                final date = allDates[group.x.toInt()];
+                final label = rodIndex == 0 ? "Revenue" : "Expense";
+                return BarTooltipItem(
+                  "$label\n${date.day}/${date.month}/${date.year}\nRs ${rod.toY.toStringAsFixed(1)}",
+                  const TextStyle(color: Colors.white, fontSize: 12),
+                );
+              },
+            ),
+            touchCallback: (FlTouchEvent event, barTouchResponse) {
+              if (event is FlTapUpEvent && barTouchResponse != null && barTouchResponse.spot != null) {
+                final touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+                if (touchedIndex >= 0 && touchedIndex < allDates.length) {
+                  final selectedDate = allDates[touchedIndex];
+                  // You can add code here to fetch detailed data for the selected date
+                  // For example, show a dialog or navigate to a details screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Selected date: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}"),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+          maxY: maxValue * 1.1, // Add 10% padding to the top
         ),
       ),
     );
@@ -550,4 +744,6 @@ class _InfoCard extends StatelessWidget {
       ),
     );
   }
+
+
 }
